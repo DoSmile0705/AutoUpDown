@@ -30,12 +30,6 @@ from selenium.webdriver.chrome.service import Service
 now = datetime.now()
 Num = str(now.strftime("%b") + "_" + now.strftime("%d"))
 o = uc.ChromeOptions()
-# chrome_prefs = {
-#     "profile.default_content_setting_values": {
-#         "images": 2,
-#     }
-# }
-# o.experimental_options["prefs"] = chrome_prefs
 
 
 class App(customtkinter.CTk):
@@ -106,62 +100,63 @@ class App(customtkinter.CTk):
         self.exit_auto_button.place(x=95, y=370)
 
     def start_action(self):
-        # old_name = 'C:/Users/EDU/Documents/VSLeads.csv'
-        # new_name = 'C:/Users/EDU/Documents/FullArgos_' + Num + '.csv'
-        # self.start_auto_button.configure(state="disabled")
-        # self.stop_auto_button.configure(state="enable")
-        # if os.path.isfile(new_name):
-        #     os.remove(new_name)
+        global new_name, old_name
+        old_name = 'C:/Users/Administrator/Documents/VSLeads.csv'
+        new_name = 'C:/Users/Administrator/Documents/FullArgos_' + Num + '.csv'
+        self.start_auto_button.configure(state="disabled")
+        self.stop_auto_button.configure(state="enable")
+        if os.path.isfile(new_name):
+            os.remove(new_name)
 
-        # def section1():
+        def section1():
 
-        #     if os.path.isfile(old_name):
-        #         os.rename(old_name, new_name)
-        #     else:
-        #         os.startfile("C:\VS Automation Suite\VSAutomationSuite.exe")
-        #         time.sleep(60)
-        #         keyDown("Alt")
-        #         keyUp("Alt")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Enter")
-        #         keyUp("Enter")
-        #         time.sleep(60)
-        # section1()
+            if os.path.isfile(old_name):
+                os.rename(old_name, new_name)
+            else:
+                os.startfile("C:\VS Automation Suite\VSAutomationSuite.exe")
+                time.sleep(30)
+                keyDown("Alt")
+                keyUp("Alt")
+                keyDown("Tab")
+                keyUp("Tab")
+                keyDown("Tab")
+                keyUp("Tab")
+                keyDown("Tab")
+                keyUp("Tab")
+                keyDown("Tab")
+                keyUp("Tab")
+                keyDown("Enter")
+                keyUp("Enter")
+                time.sleep(30)
+        section1()
 
         def section2():
             if os.path.isfile(new_name):
                 driver = uc.Chrome(options=o)
-                # driver.maximize_window()
-                # driver.get("http://ushtoolkit.com/login?next=%2Fhome")
-                # time.sleep(0.5)
-                # mailaddress = driver.find_element(By.ID, "email")
-                # loginpwd = driver.find_element(By.ID, "password")
-                # time.sleep(4)
-                # mailaddress.send_keys("admin@admin")
-                # loginpwd.send_keys("123@dmin123")
-                # loginpwd.send_keys(Keys.ENTER)
-                # time.sleep(1)
-                # keyDown("Tab")
-                # keyUp("Tab")
-                # keyDown("Enter")
-                # keyUp("Enter")
-                # driver.get("http://ushtoolkit.com/home")
-                # time.sleep(0.5)
-                # s = driver.find_element(By.XPATH, "//input[@type='file']")
-                # s.send_keys(r"C:\Users\EDU\Documents\FullArgos_" + Num + r".csv")
-                # time.sleep(1)
-                # pullnumber = driver.find_element(
-                #     By.XPATH, "/html/body/div/div/div[2]/div[2]/form/input")
-                # pullnumber.send_keys(3000)
-                # pullnumber.send_keys(Keys.ENTER)
-                # time.sleep(5)
+                driver.maximize_window()
+                driver.get("http://ushtoolkit.com/login?next=%2Fhome")
+                time.sleep(0.5)
+                mailaddress = driver.find_element(By.ID, "email")
+                loginpwd = driver.find_element(By.ID, "password")
+                time.sleep(4)
+                mailaddress.send_keys("admin@admin")
+                loginpwd.send_keys("123@dmin123")
+                loginpwd.send_keys(Keys.ENTER)
+                time.sleep(1)
+                keyDown("Tab")
+                keyUp("Tab")
+                keyDown("Enter")
+                keyUp("Enter")
+                driver.get("http://ushtoolkit.com/home")
+                time.sleep(0.5)
+                s = driver.find_element(By.XPATH, "//input[@type='file']")
+                s.send_keys(r"C:\Users\EDU\Documents\FullArgos_" + Num + r".csv")
+                time.sleep(1)
+                pullnumber = driver.find_element(
+                    By.XPATH, "/html/body/div/div/div[2]/div[2]/form/input")
+                pullnumber.send_keys(3000)
+                pullnumber.send_keys(Keys.ENTER)
+                time.sleep(5)
 
                 driver.get("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3Dgoogle%2Baccoutn%2Blogin%26oq%3Dgoogle%2Baccoutn%2Blogin%26gs_lcrp%3DEgZjaHJvbWUyBggAEEUYOTIGCAEQRRhA0gEIMzc5MWowajGoAgCwAgA%26sourceid%3Dchrome%26ie%3DUTF-8&ec=GAZAAQ&hl=en&ifkv=AXo7B7UU_PO6Mb5aew0_pu1FKg0cFhYGfWQcfBaZ36Im93fm8ZhyhCSXMZexE6haciBh5-SJnoOziw&passive=true&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S1073873525%3A1693982222426548&theme=glif")
                 time.sleep(6)
@@ -175,7 +170,7 @@ class App(customtkinter.CTk):
                 loginemail.send_keys("rhi20020705!")
                 loginemail.send_keys(Keys.ENTER)
                 driver.get("https://drive.google.com/drive/folders/1Ph6YRWYl_KJ9tCMAj19FgFj1aJH499bF")
-                driver.close()
+                # driver.close()
             # else:
             #     section1()
         section2()

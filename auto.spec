@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(
     ['auto.py'],
-    pathex=['D:\\test\\AutoClicker\\Lib\\site-packages'],
+    pathex=['C:\\Users\\Administrator\\Documents\\AutoUpDown\\Liblsite-packages'],
     binaries=[],
     datas=[],
     hiddenimports=[],
