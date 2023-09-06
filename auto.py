@@ -171,8 +171,6 @@ class App(customtkinter.CTk):
                 loginemail.send_keys(Keys.ENTER)
                 driver.get("https://drive.google.com/drive/folders/1Ph6YRWYl_KJ9tCMAj19FgFj1aJH499bF")
                 # driver.close()
-            # else:
-            #     section1()
         section2()
 
     def stop_action(self):
