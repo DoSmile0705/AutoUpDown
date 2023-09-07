@@ -1,4 +1,0 @@
-customtkinter
-pyautogui
-pynput
-pydirectinput
