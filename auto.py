@@ -43,7 +43,8 @@ old_name = 'C:/Users/Zach/Documents/VSLeads.csv'
 new_name = 'C:/Users/Zach/Documents/FullArgos_' + Num + '.csv'
 old_lead = 'C:/Users/Zach/Downloads/leads.csv'
 new_lead = 'C:/Users/Zach/Downloads/ArgosLeads_' + Num + '.csv'
-
+uc.install(executable_path=PATH,)
+drivers_dict = {}
 
 class App(customtkinter.CTk):
     WIDTH = 350
@@ -113,7 +114,7 @@ class App(customtkinter.CTk):
         self.exit_auto_button.place(x=95, y=370)
 
     def start_action(self):
-        global new_name, old_name
+        # global new_name, old_name
         self.start_auto_button.configure(state="disabled")
         self.stop_auto_button.configure(state="enable")
         if os.path.isfile(new_name):
@@ -141,7 +142,7 @@ class App(customtkinter.CTk):
             keyUp("Tab")
             keyDown("Enter")
             keyUp("Enter")
-            time.sleep(20)
+            time.sleep(15)
             keyDown("Tab")
             keyUp("Tab")
             keyDown("Tab")
@@ -149,14 +150,13 @@ class App(customtkinter.CTk):
             keyDown("Enter")
             keyUp("Enter")
             os.rename(old_name, new_name)
+            time.sleep(1)
+            os.system("taskkill /f /im VSAutomationSuite.exe")
         section1()
-
-        time.sleep(10)
         driver = uc.Chrome(options=o)
-
         def section2():
             if os.path.isfile(new_name):
-                time.sleep(20)
+                time.sleep(0.5)
                 driver.maximize_window()
                 driver.get("http://ushtoolkit.com/login?next=%2Fhome")
                 time.sleep(0.5)
@@ -167,10 +167,6 @@ class App(customtkinter.CTk):
                 loginpwd.send_keys("123@dmin123")
                 loginpwd.send_keys(Keys.ENTER)
                 time.sleep(1)
-                keyDown("Tab")
-                keyUp("Tab")
-                keyDown("Enter")
-                keyUp("Enter")
                 driver.get("http://ushtoolkit.com/home")
                 time.sleep(0.5)
                 s = driver.find_element(By.XPATH, "//input[@type='file']")
@@ -181,29 +177,38 @@ class App(customtkinter.CTk):
                     By.XPATH, "/html/body/div/div/div[2]/div[2]/form/input")
                 pullnumber.send_keys(3000)
                 pullnumber.send_keys(Keys.ENTER)
-                time.sleep(5)
             else:
                 section1()
                 section2()
-            time.sleep(5)
+            time.sleep(1)
             os.rename(old_lead, new_lead)
+            driver.close()
         section2()
-        
-         # Create a folder metadata with the desired parent folder ID
+
+        results = drive_service.files().list(
+            q=f"name='{Num}' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+            fields="files(id)").execute()
+        items = results.get('files', [])
+
+        # Delete the folder(s) with the specified name
+        for item in items:
+            folder_id = item['id']
+            drive_service.files().delete(fileId=folder_id).execute()
+            print(f"Deleted folder: {folder_id}")
+        # drive_service.files().delete(filename = Num).exvute
         folder_metadata = {
             'name': Num,
             'parents': [FOLDER_ID],
             'mimeType': 'application/vnd.google-apps.folder'
         }
-
         # Create the folder in Google Drive
         created_folder = drive_service.files().create(
             body=folder_metadata,
             fields='id'
         ).execute()
-        
+
         CREATED_FOLDER_ID = created_folder.get("id")
-        
+
         # Change this to the file you want to upload
         file_name = 'ArgosLeads_' + Num + '.csv'
         # # Change this to the actual file path
@@ -222,6 +227,9 @@ class App(customtkinter.CTk):
             media_body=media_body,
             fields='id'
         ).execute()
+
+        self.start_auto_button.configure(state="enable")
+        self.stop_auto_button.configure(state="disable")
 
     def stop_action(self):
         self.start_auto_button.configure(state="enable")
