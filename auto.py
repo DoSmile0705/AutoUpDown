@@ -26,10 +26,23 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.select import Select
 from zenrows import ZenRowsClient
 from selenium.webdriver.chrome.service import Service
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from googleapiclient.http import MediaFileUpload
 
 now = datetime.now()
 Num = str(now.strftime("%b") + "_" + now.strftime("%d"))
 o = uc.ChromeOptions()
+SERVICE_ACCOUNT_FILE = 'argos_cred.json'
+FOLDER_ID = '1Ph6YRWYl_KJ9tCMAj19FgFj1aJH499bF'
+credentials = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_FILE
+)
+drive_service = build('drive', 'v3', credentials=credentials)
+old_name = 'C:/Users/Zach/Documents/VSLeads.csv'
+new_name = 'C:/Users/Zach/Documents/FullArgos_' + Num + '.csv'
+old_lead = 'C:/Users/Zach/Downloads/leads.csv'
+new_lead = 'C:/Users/Zach/Downloads/ArgosLeads_' + Num + '.csv'
 
 
 class App(customtkinter.CTk):
@@ -100,123 +113,115 @@ class App(customtkinter.CTk):
         self.exit_auto_button.place(x=95, y=370)
 
     def start_action(self):
-        # global new_name, old_name
-        # old_name = 'C:/Users/Zach/Documents/VSLeads.csv'
-        # new_name = 'C:/Users/Zach/Documents/FullArgos_' + Num + '.csv'
-
+        global new_name, old_name
         self.start_auto_button.configure(state="disabled")
         self.stop_auto_button.configure(state="enable")
-        # if os.path.isfile(new_name):
-        #     os.remove(new_name)
+        if os.path.isfile(new_name):
+            os.remove(new_name)
+        if os.path.isfile(old_name):
+            os.remove(old_name)
+        if os.path.isfile(new_lead):
+            os.remove(new_lead)
+        if os.path.isfile(old_lead):
+            os.remove(old_lead)
         print("This is test!")
-        driver = uc.Chrome(options=o)
-        driver.get("https://new.vanillasoft.net")
-        time.sleep(1)
-        vanillausername = driver.find_element(By.ID, "cf_field_2")
-        vanillapwd = driver.find_element(By.ID, "cf_field_3")
-        time.sleep(3)
-        vanillausername.send_keys("zacharyyoung4@gmail.com")
-        vanillapwd.send_keys("USHA2023!!!")
-        vanillapwd.send_keys(Keys.ENTER)
+
+        def section1():
+            os.startfile("C:\VS Automation Suite\VSAutomationSuite.exe")
+            time.sleep(20)
+            keyDown("Alt")
+            keyUp("Alt")
+            keyDown("Tab")
+            keyUp("Tab")
+            keyDown("Tab")
+            keyUp("Tab")
+            keyDown("Tab")
+            keyUp("Tab")
+            keyDown("Tab")
+            keyUp("Tab")
+            keyDown("Enter")
+            keyUp("Enter")
+            time.sleep(20)
+            keyDown("Tab")
+            keyUp("Tab")
+            keyDown("Tab")
+            keyUp("Tab")
+            keyDown("Enter")
+            keyUp("Enter")
+            os.rename(old_name, new_name)
+        section1()
+
         time.sleep(10)
-        driver.get("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3Dgoogle%2Baccoutn%2Blogin%26oq%3Dgoogle%2Baccoutn%2Blogin%26gs_lcrp%3DEgZjaHJvbWUyBggAEEUYOTIGCAEQRRhA0gEIMzc5MWowajGoAgCwAgA%26sourceid%3Dchrome%26ie%3DUTF-8&ec=GAZAAQ&hl=en&ifkv=AXo7B7UU_PO6Mb5aew0_pu1FKg0cFhYGfWQcfBaZ36Im93fm8ZhyhCSXMZexE6haciBh5-SJnoOziw&passive=true&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S1073873525%3A1693982222426548&theme=glif")
-        time.sleep(6)
-        loginemail = driver.find_element(
-            By.XPATH, "//input[@type='email']")
-        loginemail.send_keys("healthycoveragecouncil@gmail.com")
-        loginemail.send_keys(Keys.ENTER)
-        time.sleep(6)
-        loginemail = driver.find_element(
-            By.XPATH, "//input[@type='password']")
-        loginemail.send_keys("USHA2023!!!")
-        loginemail.send_keys(Keys.ENTER)
-        driver.get("https://drive.google.com/drive/my-drive")
-        time.sleep(1)
-        driver.get("https://drive.google.com/drive/folders/1Ph6YRWYl_KJ9tCMAj19FgFj1aJH499bF")
+        driver = uc.Chrome(options=o)
+
+        def section2():
+            if os.path.isfile(new_name):
+                time.sleep(20)
+                driver.maximize_window()
+                driver.get("http://ushtoolkit.com/login?next=%2Fhome")
+                time.sleep(0.5)
+                mailaddress = driver.find_element(By.ID, "email")
+                loginpwd = driver.find_element(By.ID, "password")
+                time.sleep(4)
+                mailaddress.send_keys("admin@admin")
+                loginpwd.send_keys("123@dmin123")
+                loginpwd.send_keys(Keys.ENTER)
+                time.sleep(1)
+                keyDown("Tab")
+                keyUp("Tab")
+                keyDown("Enter")
+                keyUp("Enter")
+                driver.get("http://ushtoolkit.com/home")
+                time.sleep(0.5)
+                s = driver.find_element(By.XPATH, "//input[@type='file']")
+                s.send_keys(
+                    r"C:\Users\Zack\Documents\FullArgos_" + Num + r".csv")
+                time.sleep(1)
+                pullnumber = driver.find_element(
+                    By.XPATH, "/html/body/div/div/div[2]/div[2]/form/input")
+                pullnumber.send_keys(3000)
+                pullnumber.send_keys(Keys.ENTER)
+                time.sleep(5)
+            else:
+                section1()
+                section2()
+            time.sleep(5)
+            os.rename(old_lead, new_lead)
+        section2()
         
+         # Create a folder metadata with the desired parent folder ID
+        folder_metadata = {
+            'name': Num,
+            'parents': [FOLDER_ID],
+            'mimeType': 'application/vnd.google-apps.folder'
+        }
 
-        # def section1():
-        #     if os.path.isfile(old_name):
-        #         os.rename(old_name, new_name)
-        #     else:
-        #         os.startfile("C:\VS Automation Suite\VSAutomationSuite.exe")
-        #         time.sleep(20)
-        #         keyDown("Alt")
-        #         keyUp("Alt")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Enter")
-        #         keyUp("Enter")
-        #         time.sleep(20)
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Enter")
-        #         keyUp("Enter")
-        # section1()
+        # Create the folder in Google Drive
+        created_folder = drive_service.files().create(
+            body=folder_metadata,
+            fields='id'
+        ).execute()
+        
+        CREATED_FOLDER_ID = created_folder.get("id")
+        
+        # Change this to the file you want to upload
+        file_name = 'ArgosLeads_' + Num + '.csv'
+        # # Change this to the actual file path
+        file_path = 'C:/Users/Zach/Downloads/' + file_name
 
-        # def section2():
-        #     driver = uc.Chrome(options=o)
-        #     if os.path.isfile(new_name):
-        #         time.sleep(20)
-        #         driver.maximize_window()
-        #         driver.get("http://ushtoolkit.com/login?next=%2Fhome")
-        #         time.sleep(0.5)
-        #         mailaddress = driver.find_element(By.ID, "email")
-        #         loginpwd = driver.find_element(By.ID, "password")
-        #         time.sleep(4)
-        #         mailaddress.send_keys("admin@admin")
-        #         loginpwd.send_keys("123@dmin123")
-        #         loginpwd.send_keys(Keys.ENTER)
-        #         time.sleep(1)
-        #         keyDown("Tab")
-        #         keyUp("Tab")
-        #         keyDown("Enter")
-        #         keyUp("Enter")
-        #         driver.get("http://ushtoolkit.com/home")
-        #         time.sleep(0.5)
-        #         s = driver.find_element(By.XPATH, "//input[@type='file']")
-        #         s.send_keys(
-        #             r"C:\Users\Zack\Documents\FullArgos_" + Num + r".csv")
-        #         time.sleep(1)
-        #         pullnumber = driver.find_element(
-        #             By.XPATH, "/html/body/div/div/div[2]/div[2]/form/input")
-        #         pullnumber.send_keys(3000)
-        #         pullnumber.send_keys(Keys.ENTER)
-        #         time.sleep(5)
-        #     else:
-        #         section1()
-        #     old_lead = 'C:/Users/Zach/Downloads/leads.csv'
-        #     new_lead = 'C:/Users/Zach/Downloads/ArgosLeads_' + Num + '.csv'
-        #     if os.path.isfile(new_lead):
-        #         os.remove(new_lead)
-        #     time.sleep(5)
-        #     if os.path.isfile(old_lead):
-        #         os.rename(old_lead, new_lead)
+        # Create a file metadata with the desired folder ID
+        file_metadata = {
+            'name': file_name,
+            'parents': [CREATED_FOLDER_ID]
+        }
 
-        #     driver.get("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3Dgoogle%2Baccoutn%2Blogin%26oq%3Dgoogle%2Baccoutn%2Blogin%26gs_lcrp%3DEgZjaHJvbWUyBggAEEUYOTIGCAEQRRhA0gEIMzc5MWowajGoAgCwAgA%26sourceid%3Dchrome%26ie%3DUTF-8&ec=GAZAAQ&hl=en&ifkv=AXo7B7UU_PO6Mb5aew0_pu1FKg0cFhYGfWQcfBaZ36Im93fm8ZhyhCSXMZexE6haciBh5-SJnoOziw&passive=true&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S1073873525%3A1693982222426548&theme=glif")
-        #     time.sleep(6)
-        #     loginemail = driver.find_element(
-        #         By.XPATH, "//input[@type='email']")
-        #     loginemail.send_keys("healthycoveragecouncil@gmail.com")
-        #     loginemail.send_keys(Keys.ENTER)
-        #     time.sleep(6)
-        #     loginemail = driver.find_element(
-        #         By.XPATH, "//input[@type='password']")
-        #     loginemail.send_keys("USHA2023!!!")
-        #     loginemail.send_keys(Keys.ENTER)
-        #     driver.get("https://drive.google.com/drive/folders/1Ph6YRWYl_KJ9tCMAj19FgFj1aJH499bF")
-        #     # driver.close()
-        #     # else:
-        #     #     section1()
-        # section2()
+        # Upload the file to Google Drive
+        media_body = MediaFileUpload(file_path, resumable=True)
+        file = drive_service.files().create(
+            body=file_metadata,
+            media_body=media_body,
+            fields='id'
+        ).execute()
 
     def stop_action(self):
         self.start_auto_button.configure(state="enable")
