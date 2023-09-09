@@ -29,26 +29,31 @@ from selenium.webdriver.chrome.service import Service
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
+import datetime as dt
+from tkinter import *
+from tkcalendar import *
 
 now = datetime.now()
 Num = str(now.strftime("%b") + "_" + now.strftime("%d"))
 o = uc.ChromeOptions()
+
 SERVICE_ACCOUNT_FILE = 'argos_cred.json'
 FOLDER_ID = '1Ph6YRWYl_KJ9tCMAj19FgFj1aJH499bF'
 credentials = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE
 )
 drive_service = build('drive', 'v3', credentials=credentials)
+
 old_name = 'C:/Users/Zach/Documents/VSLeads.csv'
 new_name = 'C:/Users/Zach/Documents/FullArgos_' + Num + '.csv'
 old_lead = 'C:/Users/Zach/Downloads/leads.csv'
 new_lead = 'C:/Users/Zach/Downloads/ArgosLeads_' + Num + '.csv'
-uc.install(executable_path=PATH,)
-drivers_dict = {}
+f = ('Times', 20)
+
 
 class App(customtkinter.CTk):
     WIDTH = 350
-    HEIGHT = 440
+    HEIGHT = 500
 
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("blue")
@@ -64,6 +69,66 @@ class App(customtkinter.CTk):
         self.frame.grid_columnconfigure(0, weight=1)
         self.frame.grid_columnconfigure(1, weight=1)
         self.frame.grid_columnconfigure(5, weight=1)
+        frame_time = customtkinter.CTkFrame(master=self,
+                                            width=280,
+                                            height=300,
+                                            corner_radius=10)
+        frame_time.place(relx=0.5, rely=0.46, anchor=CENTER)
+        global cal, min_sb, sec_hour, sec, msg_display
+        cal = Calendar(
+            frame_time,
+            selectmode="day",
+        )
+        cal.place(relx=0.5, rely=0.32, anchor=CENTER)
+        min_sb = Spinbox(
+            frame_time,
+            from_=0,
+            to=23,
+            wrap=True,
+            width=2,
+            state="readonly",
+            font=f,
+            justify=CENTER
+        )
+        sec_hour = Spinbox(
+            frame_time,
+            from_=0,
+            to=59,
+            wrap=True,
+            state="readonly",
+            font=f,
+            width=2,
+            justify=CENTER
+        )
+
+        sec = Spinbox(
+            frame_time,
+            from_=0,
+            to=59,
+            wrap=True,
+            state="readonly",
+            width=2,
+            font=f,
+            justify=CENTER
+        )
+        min_sb.place(relx=0.26, rely=0.65)
+        sec_hour.place(relx=0.44, rely=0.65)
+        sec.place(relx=0.62, rely=0.65)
+        msg = Label(
+            frame_time,
+            text="H : M : S",
+            font=("Times", 12),
+            background="#2b2b2b",
+            foreground="white"
+        )
+        msg.place(relx=0.5, rely=0.82, anchor=CENTER)
+        msg_display = Label(
+            frame_time,
+            text="",
+            background="#2b2b2b",
+            foreground="white"
+        )
+        msg_display.place(relx=0.5, rely=0.9, anchor=CENTER)
 
         def my_time():
             global time_string
@@ -92,7 +157,7 @@ class App(customtkinter.CTk):
             font=("Roboto Medium", -16),
             command=self.start_action,
         )
-        self.start_auto_button.place(x=95, y=280)
+        self.start_auto_button.place(x=95, y=370)
 
         self.stop_auto_button = customtkinter.CTkButton(
             master=self.frame,
@@ -102,7 +167,7 @@ class App(customtkinter.CTk):
             state="disabled",
             command=self.stop_action,
         )
-        self.stop_auto_button.place(x=95, y=315)
+        self.stop_auto_button.place(x=95, y=405)
 
         self.exit_auto_button = customtkinter.CTkButton(
             master=self.frame,
@@ -111,10 +176,16 @@ class App(customtkinter.CTk):
             font=("Roboto Medium", -16),
             command=self.on_close,
         )
-        self.exit_auto_button.place(x=95, y=370)
+        self.exit_auto_button.place(x=95, y=440)
 
     def start_action(self):
-        # global new_name, old_name
+        date = cal.get_date()
+        m = min_sb.get()
+        h = sec_hour.get()
+        s = sec.get()
+        t = f"Automation will start at {m}:{h}:{s}, {date}."
+        msg_display.config(text=t)
+
         self.start_auto_button.configure(state="disabled")
         self.stop_auto_button.configure(state="enable")
         if os.path.isfile(new_name):
