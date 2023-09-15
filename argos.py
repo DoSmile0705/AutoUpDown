@@ -137,15 +137,26 @@ class App(customtkinter.CTk):
         l.place(x=35, y=50)
 
         my_time()
-        
+
+        def stop_action():
+            global stop_flag
+            stop_flag = False
+            self.start_auto_button.configure(state="enable")
+            self.stop_auto_button.configure(state="disabled")
 
         def start_action():
+            if os.path.isfile(new_name):
+                os.remove(new_name)
+            if os.path.isfile(old_name):
+                os.remove(old_name)
+            if os.path.isfile(new_lead):
+                os.remove(new_lead)
+            if os.path.isfile(old_lead):
+                os.remove(old_lead)
+            self.stop_auto_button.configure(state="enable")
             global stop_flag
             stop_flag = True
-            while stop_flag:
-                # if keyboard.is_pressed('ctrl+space'):
-                #     break
-                self.update()
+            while stop_flag == True:
                 date = cal.get_date()
                 m = min_sb.get()
                 h = sec_hour.get()
@@ -166,20 +177,21 @@ class App(customtkinter.CTk):
                     ExpectedDate, "%d/%m/%Y %H:%M:%S")
 
                 if CurrentDate < ExpectedDate:
-                    self.start_auto_button.configure(state="disabled")       
+                    self.start_auto_button.configure(state="disabled")
                     self.stop_auto_button.configure(state="enable")
                     messagebox.showinfo(
                         "AutoUpDown", f"Automation will start at {m}:{h}:{s}, {month_}/{day_}/{year_}.")
                     # pyautogui.hotkey('win', 'down')
                     while CurrentDate < ExpectedDate:
                         start_flag = False  # Wait for 1 second
-                        CurrentDate = datetime.now()        
+                        CurrentDate = datetime.now()
                         self.update()
                     start_flag = True
                 else:
                     messagebox.showinfo("AutoUpDown", "Plz set correct time.")
-                    start_flag = False      
+                    start_flag = False
                     break
+                
 
                 while start_flag == True:
                     if os.path.isfile(new_name):
@@ -190,10 +202,16 @@ class App(customtkinter.CTk):
                         os.remove(new_lead)
                     if os.path.isfile(old_lead):
                         os.remove(old_lead)
+
+                    time.sleep(3)
+
                     def section1():
                         os.startfile(
                             "C:\VS Automation Suite\VSAutomationSuite.exe")
-                        time.sleep(25)
+                        time.sleep(35)
+                        pyautogui.click(x=800, y=500)
+                        time.sleep(2)
+                        print("ok!")
                         keyDown("Alt")
                         keyUp("Alt")
                         time.sleep(0.5)
@@ -211,17 +229,10 @@ class App(customtkinter.CTk):
                         time.sleep(0.5)
                         keyDown("Enter")
                         keyUp("Enter")
-                        time.sleep(17)
-                        keyDown("Tab")
-                        keyUp("Tab")
-                        keyDown("Tab")
-                        keyUp("Tab")
-                        keyDown("Enter")
-                        keyUp("Enter")
-                        time.sleep(1)
+                        time.sleep(15)
                         os.system("taskkill /f /im VSAutomationSuite.exe")
                     section1()
-                    driver = uc.Chrome(options=o)
+
                     def section2():
                         if os.path.isfile(old_name):
                             os.rename(old_name, new_name)
@@ -229,6 +240,7 @@ class App(customtkinter.CTk):
                             section1()
                             section2()
                         time.sleep(1)
+                        driver = uc.Chrome(options=o)
                         if os.path.isfile(new_name):
                             time.sleep(0.5)
                             driver.maximize_window()
@@ -241,81 +253,74 @@ class App(customtkinter.CTk):
                             mailaddress.send_keys("admin@admin")
                             loginpwd.send_keys("123@dmin123")
                             loginpwd.send_keys(Keys.ENTER)
-                            time.sleep(1)
+                            time.sleep(2)
                             driver.get("http://ushtoolkit.com/home")
                             s = driver.find_element(
                                 By.XPATH, "//input[@type='file']")
-                            s.send_keys(        
-                                        
+                            s.send_keys(
                                 r"C:\Users\Zack\Documents\FullArgos_" + Num + r".csv")
-                            time.sleep(1)
+                            time.sleep(2)
                             pullnumber = driver.find_element(
                                 By.XPATH, "/html/body/div/div/div[2]/div[2]/form/input")
                             pullnumber.send_keys(3000)
                             pullnumber.send_keys(Keys.ENTER)
+                            os.remove(new_name)
                         else:
                             section1()
                             section2()
-                        time.sleep(1)
+                        time.sleep(2)
                         os.rename(old_lead, new_lead)
-                        driver.close()
+                        # driver.close()
+
+                        results = drive_service.files().list(
+                            q=f"name='{Num}' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+                            fields="files(id)").execute()
+                        items = results.get('files', [])
+                        # Delete the folder(s) with the specified name
+                        for item in items:
+                            folder_id = item['id']
+                            drive_service.files().delete(fileId=folder_id).execute()
+                            print(f"Deleted folder: {folder_id}")
+                        # drive_service.files().delete(filename = Num).exvute
+                        folder_metadata = {
+                            'name': Num,
+                            'parents': [FOLDER_ID],
+                            'mimeType': 'application/vnd.google-apps.folder'
+                        }
+                        # Create the folder in Google Drive
+                        created_folder = drive_service.files().create(
+                            body=folder_metadata,
+                            fields='id'
+                        ).execute()
+                        CREATED_FOLDER_ID = created_folder.get("id")
+                        # Change this to the file you want to upload
+                        file_name = 'ArgosLeads_' + Num + '.csv'
+                        # # Change this to the actual file path
+                        file_path = 'C:/Users/Zach/Downloads/' + file_name
+                        # Create a file metadata with the desired folder ID
+                        file_metadata = {
+                            'name': file_name,
+                            'parents': [CREATED_FOLDER_ID]
+                        }
+                        # Upload the file to Google Drive
+                        media_body = MediaFileUpload(file_path, resumable=True)
+                        file = drive_service.files().create(
+                            body=file_metadata,
+                            media_body=media_body,
+                            fields='id'
+                        ).execute()
+                        
+
                     section2()
-
-                    results = drive_service.files().list(
-                        q=f"name='{Num}' and mimeType='application/vnd.google-apps.folder' and trashed=false",
-                        fields="files(id)").execute()
-                    items = results.get('files', [])
-                    # Delete the folder(s) with the specified name
-                    for item in items:
-                        folder_id = item['id']
-                        drive_service.files().delete(fileId=folder_id).execute()
-                        print(f"Deleted folder: {folder_id}")
-                    # drive_service.files().delete(filename = Num).exvute
-                    folder_metadata = {
-                        'name': Num,
-                        'parents': [FOLDER_ID],
-                        'mimeType': 'application/vnd.google-apps.folder'
-                    }
-                    # Create the folder in Google Drive
-                    created_folder = drive_service.files().create(
-                        body=folder_metadata,
-                        fields='id'
-                    ).execute()
-                    CREATED_FOLDER_ID = created_folder.get("id")
-                    # Change this to the file you want to upload
-                    file_name = 'ArgosLeads_' + Num + '.csv'
-                    # # Change this to the actual file path
-                    file_path = 'C:/Users/Zach/Downloads/' + file_name
-                    # Create a file metadata with the desired folder ID
-                    file_metadata = {
-                        'name': file_name,
-                        'parents': [CREATED_FOLDER_ID]
-                    }
-                    # Upload the file to Google Drive
-                    media_body = MediaFileUpload(file_path, resumable=True)
-                    file = drive_service.files().create(
-                        body=file_metadata,
-                        media_body=media_body,
-                        fields='id'
-                    ).execute()
-
-                    self.update
-                    
-                    os.remove(old_lead)
-                    os.remove(new_name)
-                    
-                    self.destroy()
-                break        
-
-        def stop_action():
-            global stop_flag
-            stop_flag = False
-            self.start_auto_button.configure(state="enable")
-            self.stop_auto_button.configure(state="disabled")
+                    self.update()
+                    break
+                time.sleep(3)
+                # self.destroy()
+                break
 
         def on_close():
             self.destroy()
-            
+
         # title section
         self.title = customtkinter.CTkLabel(
             master=self.frame, text="Current Time", font=("Times", -25),
@@ -351,7 +356,7 @@ class App(customtkinter.CTk):
         )
         self.exit_auto_button.place(x=95, y=440)
 
-        # keyboard.add_hotkey('space', start_action) 
+        # keyboard.add_hotkey('space', start_action)
         # keyboard.add_hotkey('ctrl+space', stop_action)
         # keyboard.add_hotkey('ctrl+alt+space', on_close)
 
